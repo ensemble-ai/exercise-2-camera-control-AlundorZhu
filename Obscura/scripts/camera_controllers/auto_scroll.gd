@@ -26,18 +26,19 @@ func draw_logic() -> void:
 	mesh_instance.mesh = immediate_mesh
 	mesh_instance.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	
-	#var left:float = -cross_hair_width / 2
-	#var right:float = cross_hair_width / 2
-	#var top:float = -cross_hair_height / 2
-	#var bottom:float = cross_hair_height / 2
-	#
-	#immediate_mesh.surface_begin(Mesh.PRIMITIVE_LINES, material)
-	#immediate_mesh.surface_add_vertex(Vector3(right, 0, 0))
-	#immediate_mesh.surface_add_vertex(Vector3(left, 0, 0))
-	#
-	#immediate_mesh.surface_add_vertex(Vector3(0, 0, bottom))
-	#immediate_mesh.surface_add_vertex(Vector3(0, 0, top))
-	#immediate_mesh.surface_end()
+	immediate_mesh.surface_begin(Mesh.PRIMITIVE_LINES, material)
+	immediate_mesh.surface_add_vertex(Vector3(right, 0, top))
+	immediate_mesh.surface_add_vertex(Vector3(right, 0, bottom))
+	
+	immediate_mesh.surface_add_vertex(Vector3(right, 0, bottom))
+	immediate_mesh.surface_add_vertex(Vector3(left, 0, bottom))
+	
+	immediate_mesh.surface_add_vertex(Vector3(left, 0, bottom))
+	immediate_mesh.surface_add_vertex(Vector3(left, 0, top))
+	
+	immediate_mesh.surface_add_vertex(Vector3(left, 0, top))
+	immediate_mesh.surface_add_vertex(Vector3(right, 0, top))
+	immediate_mesh.surface_end()
 
 	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	material.albedo_color = Color.BLACK
@@ -49,3 +50,4 @@ func draw_logic() -> void:
 	#mesh is freed after one update of _process
 	await get_tree().process_frame
 	mesh_instance.queue_free()
+
