@@ -15,7 +15,7 @@ func _physics_process(_delta):
 	
 	var speed = BASE_SPEED
 	$ParticleTrail.visible = false 
-	if Input.is_action_pressed("ui_accept"):
+	if Input.is_action_pressed("dash"):
 		_play($Audio/HyperSpeed)
 		speed = HYPER_SPEED
 		$ParticleTrail.visible = true
