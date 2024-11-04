@@ -1,9 +1,9 @@
 class_name AutoScroll
 extends CameraControllerBase
 
-@export var top_left:Vector2 = Vector2(10,5)
-@export var bottom_right:Vector2 = Vector2(-10, -5)
-@export var autoscroll_speed:Vector3 = Vector3(5, 0, 0)
+@export var bottom_right:Vector2 = Vector2(8,3)
+@export var top_left:Vector2 = Vector2(-10, -5)
+@export var autoscroll_speed:Vector3 = Vector3(0.5, 0, 0)
 
 func _ready() -> void:
 	super()
@@ -16,6 +16,31 @@ func _process(delta: float) -> void:
 	if draw_camera_logic:
 		draw_logic()
 		
+	global_position += delta * autoscroll_speed
+
+	var tpos = target.global_position
+	var cpos = global_position
+	var box_width = bottom_right.x - top_left.x
+	var box_height = bottom_right.y - top_left.y
+	
+	#boundary checks
+	#left
+	var diff_between_left_edges = (tpos.x - target.WIDTH / 2.0) - (cpos.x - box_width / 2.0)
+	if diff_between_left_edges < 0:
+		target.global_position.x -= diff_between_left_edges
+	#right
+	var diff_between_right_edges = (tpos.x + target.WIDTH / 2.0) - (cpos.x + box_width / 2.0)
+	if diff_between_right_edges > 0:
+		target.global_position.x -= diff_between_right_edges
+	#top
+	var diff_between_top_edges = (tpos.z - target.HEIGHT / 2.0) - (cpos.z - box_height / 2.0)
+	if diff_between_top_edges < 0:
+		target.global_position.z -= diff_between_top_edges
+	#bottom
+	var diff_between_bottom_edges = (tpos.z + target.HEIGHT / 2.0) - (cpos.z + box_height / 2.0)
+	if diff_between_bottom_edges > 0:
+		target.global_position.z -= diff_between_bottom_edges
+	
 	super(delta)
 	
 
@@ -46,8 +71,7 @@ func draw_logic() -> void:
 	
 	add_child(mesh_instance)
 	mesh_instance.global_transform = Transform3D.IDENTITY
-	mesh_instance.global_position = Vector3(global_position.x, target.global_position.y, global_position.z)
-	
+	mesh_instance.global_position = Vector3(global_position.x, target.global_position.y, global_position.z)	
 	#mesh is freed after one update of _process
 	await get_tree().process_frame
 	mesh_instance.queue_free()
