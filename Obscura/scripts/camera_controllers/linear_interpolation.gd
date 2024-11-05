@@ -3,8 +3,8 @@ extends CameraControllerBase
 
 @export var cross_hair_width:float = 5.0
 @export var cross_hair_height:float = 5.0
-@export var follow_speed:float = 0.5
-@export var catchup_speed:float = 0.8
+@export var follow_speed:float = 0.8
+@export var catchup_speed:float = 0.5
 @export var leash_distance:float = 5
 
 func _ready() -> void:
@@ -12,27 +12,22 @@ func _ready() -> void:
 	position = target.position
 	
 func _process(delta: float) -> void:
-	var speed:float
 	if !current:
 		return
 		
 	if draw_camera_logic:
 		draw_logic()
-		
+
 	var distance_to_target := Vector2(global_position.x, global_position.z).distance_to(Vector2(target.global_position.x, target.global_position.z))
 	
-	if target.velocity.is_zero_approx():
-		speed = target.BASE_SPEED * catchup_speed
-	elif distance_to_target > leash_distance:
-		# implement leash distance
+	if distance_to_target > leash_distance:
 		global_position = global_position.move_toward(target.global_position, distance_to_target - leash_distance)
-		super(delta)
-		return
-	else:
-		speed = follow_speed * target.velocity.length()
 	
-	global_position = global_position.move_toward(target.global_position, speed * delta)
-		
+	if target.velocity.is_zero_approx():
+		global_position = lerp(global_position, target.global_position, catchup_speed)
+	else:
+		global_position = lerp(global_position, target.global_position, follow_speed)
+
 	super(delta)
 	
 	
