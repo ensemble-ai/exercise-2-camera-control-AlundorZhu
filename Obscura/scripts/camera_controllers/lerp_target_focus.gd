@@ -3,13 +3,17 @@ extends CameraControllerBase
 
 @export var cross_hair_width:float = 5.0
 @export var cross_hair_height:float = 5.0
-@export var follow_speed:float = 0.8
+@export var lead_speed:float = 1.5
+@export var catchup_delay_duration:float = 1
 @export var catchup_speed:float = 0.5
 @export var leash_distance:float = 5
+
+var timer: Timer
 
 func _ready() -> void:
 	super()
 	position = target.position
+	
 	
 func _process(delta: float) -> void:
 	if !current:
@@ -20,13 +24,21 @@ func _process(delta: float) -> void:
 
 	var distance_to_target := Vector2(global_position.x, global_position.z).distance_to(Vector2(target.global_position.x, target.global_position.z))
 	
-	if distance_to_target > leash_distance:
-		global_position = global_position.move_toward(target.global_position, distance_to_target - leash_distance)
 	
 	if target.velocity.is_zero_approx():
-		global_position = lerp(global_position, target.global_position, catchup_speed)
+		if timer == null:
+			timer = Timer.new()
+			timer.start(catchup_delay_duration)
+			timer.one_shot = true
+		
+		if timer.is_stopped():
+			global_position = global_position.move_toward(target.global_position, catchup_speed * target.BASE_SPEED * delta)
+			if target.global_position.is_equal_approx(global_position):
+				timer = null
+	elif distance_to_target > leash_distance:
+		global_position = global_position.move_toward(target.global_position, distance_to_target - leash_distance)
 	else:
-		global_position = lerp(global_position, target.global_position, follow_speed)
+		global_position = global_position.move_toward(target.global_position, lead_speed * target.velocity.length() * delta)
 
 	super(delta)
 	
