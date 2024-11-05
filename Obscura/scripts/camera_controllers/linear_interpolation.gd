@@ -26,7 +26,7 @@ func _process(delta: float) -> void:
 	elif distance_to_target > leash_distance:
 		global_position = global_position.move_toward(target.global_position, distance_to_target - leash_distance)
 	else:
-		global_position = lerp(global_position, target.global_position, follow_speed * target.velocity.length() * delta)
+		global_position = global_position.move_toward(target.global_position, follow_speed * target.velocity.length() * delta)
 
 	super(delta)
 	
