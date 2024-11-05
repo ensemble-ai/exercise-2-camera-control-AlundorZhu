@@ -8,10 +8,6 @@ extends CameraControllerBase
 @export var speedup_zone_bottom_right:Vector2 = Vector2(10, 10)
 
 
-@export var box_width:float = 10.0
-@export var box_height:float = 10.0
-
-
 func _ready() -> void:
 	super()
 	position = target.position
@@ -24,29 +20,56 @@ func _process(delta: float) -> void:
 	if draw_camera_logic:
 		draw_logic()
 	
+	if is_in_box(pushbox_top_left, pushbox_bottom_right):
+		# don't move
+		#print('in inner box')
+		pass
+	elif is_in_box(speedup_zone_top_left, speedup_zone_bottom_right) and not is_in_box(pushbox_top_left, pushbox_bottom_right):
+		# move at push ratio
+		#print('in speedup zone')
+		if target.velocity.is_zero_approx():
+			# move camera
+			global_position = global_position.move_toward(target.global_position, target.BASE_SPEED * delta)
+		else:
+			global_position += target.velocity * delta * push_ratio
+	elif not is_in_box(speedup_zone_top_left, speedup_zone_bottom_right):
+		# push box 
+		push_box(speedup_zone_top_left, speedup_zone_bottom_right)
+	super(delta)
+	
+func push_box(top_left:Vector2, bottom_right:Vector2):
+	
 	var tpos = target.global_position
 	var cpos = global_position
-	
 	#boundary checks
 	#left
-	var diff_between_left_edges = (tpos.x - target.WIDTH / 2.0) - (cpos.x - box_width / 2.0)
+	var diff_between_left_edges = (tpos.x - target.WIDTH / 2.0) - (global_position.x + top_left.x)
 	if diff_between_left_edges < 0:
 		global_position.x += diff_between_left_edges
 	#right
-	var diff_between_right_edges = (tpos.x + target.WIDTH / 2.0) - (cpos.x + box_width / 2.0)
+	var diff_between_right_edges = (tpos.x + target.WIDTH / 2.0) - (global_position.x + bottom_right.x)
 	if diff_between_right_edges > 0:
 		global_position.x += diff_between_right_edges
 	#top
-	var diff_between_top_edges = (tpos.z - target.HEIGHT / 2.0) - (cpos.z - box_height / 2.0)
+	var diff_between_top_edges = (tpos.z - target.HEIGHT / 2.0) - (global_position.z + top_left.y)
 	if diff_between_top_edges < 0:
 		global_position.z += diff_between_top_edges
 	#bottom
-	var diff_between_bottom_edges = (tpos.z + target.HEIGHT / 2.0) - (cpos.z + box_height / 2.0)
+	var diff_between_bottom_edges = (tpos.z + target.HEIGHT / 2.0) - (global_position.z + bottom_right.y)
 	if diff_between_bottom_edges > 0:
 		global_position.z += diff_between_bottom_edges
-		
-	super(delta)
 
+func is_in_box(top_left: Vector2, bottom_right:Vector2) -> bool:
+	if (target.global_position.x - target.WIDTH / 2.0) < global_position.x + top_left.x:
+		return false
+	elif (target.global_position.x + target.WIDTH / 2.0) > global_position.x + bottom_right.x:
+		return false
+	elif (target.global_position.z - target.HEIGHT / 2.0) < global_position.z + top_left.y:
+		return false
+	elif (target.global_position.z + target.HEIGHT / 2.0) > global_position.z + bottom_right.y:
+		return false
+	else:
+		return true
 
 func create_box(top_left: Vector2, bottom_right: Vector2) -> MeshInstance3D:
 		var mesh_instance := MeshInstance3D.new()
