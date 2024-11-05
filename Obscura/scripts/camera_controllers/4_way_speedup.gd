@@ -2,10 +2,10 @@ class_name FourWaySpeedUp
 extends CameraControllerBase
 
 @export var push_ratio:float = 0.8
-@export var pushbox_top_left:Vector2 = Vector2(-5, -5)
-@export var pushbox_bottom_right:Vector2 = Vector2(5, 5)
-@export var speedup_zone_top_left:Vector2 = Vector2(-10, -10)
-@export var speedup_zone_bottom_right:Vector2 = Vector2(10, 10)
+@export var speedup_zone_top_left:Vector2 = Vector2(-5, -5)
+@export var speedup_zone_bottom_right:Vector2 = Vector2(5, 5)
+@export var pushbox_top_left:Vector2 = Vector2(-10, -10)
+@export var pushbox_bottom_right:Vector2 = Vector2(10, 10)
 
 
 func _ready() -> void:
@@ -20,11 +20,11 @@ func _process(delta: float) -> void:
 	if draw_camera_logic:
 		draw_logic()
 	
-	if is_in_box(pushbox_top_left, pushbox_bottom_right):
+	if is_in_box(speedup_zone_top_left, speedup_zone_bottom_right):
 		# don't move
 		#print('in inner box')
 		pass
-	elif is_in_box(speedup_zone_top_left, speedup_zone_bottom_right) and not is_in_box(pushbox_top_left, pushbox_bottom_right):
+	elif is_in_box(pushbox_top_left, pushbox_bottom_right) and not is_in_box(speedup_zone_top_left, speedup_zone_bottom_right):
 		# move at push ratio
 		#print('in speedup zone')
 		if target.velocity.is_zero_approx():
@@ -32,15 +32,14 @@ func _process(delta: float) -> void:
 			global_position = global_position.move_toward(target.global_position, target.BASE_SPEED * delta)
 		else:
 			global_position += target.velocity * delta * push_ratio
-	elif not is_in_box(speedup_zone_top_left, speedup_zone_bottom_right):
+	elif not is_in_box(pushbox_top_left, pushbox_bottom_right):
 		# push box 
-		push_box(speedup_zone_top_left, speedup_zone_bottom_right)
+		push_box(pushbox_top_left, pushbox_bottom_right)
 	super(delta)
 	
 func push_box(top_left:Vector2, bottom_right:Vector2):
 	
 	var tpos = target.global_position
-	var cpos = global_position
 	#boundary checks
 	#left
 	var diff_between_left_edges = (tpos.x - target.WIDTH / 2.0) - (global_position.x + top_left.x)
@@ -108,8 +107,8 @@ func create_box(top_left: Vector2, bottom_right: Vector2) -> MeshInstance3D:
 		return mesh_instance
 
 func draw_logic() -> void:
-	var push_box := create_box(pushbox_top_left, pushbox_bottom_right)
-	var speedup_box := create_box(speedup_zone_top_left, speedup_zone_bottom_right)
+	var push_box := create_box(speedup_zone_top_left, speedup_zone_bottom_right)
+	var speedup_box := create_box(pushbox_top_left, pushbox_bottom_right)
 
 	#mesh is freed after one update of _process
 	await get_tree().process_frame
