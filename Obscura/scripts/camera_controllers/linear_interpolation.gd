@@ -20,13 +20,13 @@ func _process(delta: float) -> void:
 
 	var distance_to_target := Vector2(global_position.x, global_position.z).distance_to(Vector2(target.global_position.x, target.global_position.z))
 	
-	if distance_to_target > leash_distance:
-		global_position = global_position.move_toward(target.global_position, distance_to_target - leash_distance)
 	
 	if target.velocity.is_zero_approx():
-		global_position = lerp(global_position, target.global_position, catchup_speed)
+		global_position = global_position.move_toward(target.global_position, catchup_speed * target.BASE_SPEED * delta)
+	elif distance_to_target > leash_distance:
+		global_position = global_position.move_toward(target.global_position, distance_to_target - leash_distance)
 	else:
-		global_position = lerp(global_position, target.global_position, follow_speed)
+		global_position = lerp(global_position, target.global_position, follow_speed * target.velocity.length() * delta)
 
 	super(delta)
 	
